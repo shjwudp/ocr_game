@@ -1,0 +1,79 @@
+import json
+import numpy as np
+import pandas as pd
+from urllib.parse import unquote
+
+
+train = [
+    "Xeon1OCR_round1_train1_20210526.csv",
+    "Xeon1OCR_round1_train_20210524.csv",
+    "Xeon1OCR_round1_train2_20210526.csv"
+]
+test = [
+    "Xeon1OCR_round1_test1_20210528.csv",
+    "Xeon1OCR_round1_test2_20210528.csv",
+    "Xeon1OCR_round1_test3_20210528.csv"
+]
+
+
+def toPaddleStyle(jso):
+    out = []
+    if "option" in jso[1]:
+        if jso[1]["option"] == "底部朝下":
+            ord = [0, 1, 2, 3]
+        elif jso[1]["option"] == "底部朝右":
+            ord = [3, 0, 1, 2]
+        elif jso[1]["option"] == "底部朝上":
+            ord = [2, 3, 0, 1]
+        elif jso[1]["option"] == "底部朝左":
+            ord = [1, 2, 3, 0]
+    for l in jso[0]:
+        out.append({
+            "transcription": l["text"][10:-2],
+            "points": np.asarray(l["coord"])
+            .astype(float)
+            .reshape((4, 2))[ord]
+            .tolist()
+        })
+    return json.dumps(out, ensure_ascii=False)
+
+
+def download():
+    df = []
+    for csv in train:
+        df.append(pd.read_csv(csv))
+    df = pd.concat(df)
+    df["链接"] = df["原始数据"].apply(lambda x: json.loads(x)["tfspath"])
+    df["链接"].to_csv("train.txt", header=False, index=False)
+
+    test_df = []
+    for i, csv in enumerate(test):
+        df = pd.read_csv(csv)
+        test_df.append(df)
+        df["链接"] = df["原始数据"].apply(lambda x: json.loads(x)["tfspath"])
+        df["链接"].to_csv(f"test{i+1}.txt", header=False, index=False)
+
+
+def prebuild():
+    valid_ratio = 0.1
+
+    train["图片"] = train["原始数据"].apply(lambda x: unquote(unquote(json.loads(x)["tfspath"].split("/")[-1])))
+    train["答案"] = train["融合答案"].apply(lambda x: toPaddleStyle(json.loads(x)))
+    valid = np.zeros((len(train),), dtype=bool)
+    valid[: int(len(train) * valid_ratio)] = True
+    np.random.shuffle(valid)
+
+    train.loc[~valid, ["图片", "答案"]].to_csv(
+        "train_label.txt", header=False, index=False, sep="\t", quoting=3
+    )
+    train.loc[valid, ["图片", "答案"]].to_csv(
+        "valid_label.txt", header=False, index=False, sep="\t", quoting=3
+    )
+
+
+def main():
+    download()
+
+
+if __name__ == "__main__":
+    main()
