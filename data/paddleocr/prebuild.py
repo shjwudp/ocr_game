@@ -19,8 +19,6 @@ test = [
     "Xeon1OCR_round1_test3_20210528.csv"
 ]
 
-img_dir 
-
 
 def toPaddleStyle(jso):
     out = []
