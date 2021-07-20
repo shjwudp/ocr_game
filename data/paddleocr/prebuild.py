@@ -53,6 +53,10 @@ def down_image(url, dst_dir):
 
 
 def download():
+    os.environ['MKL_NUM_THREADS'] = '1'
+    os.environ['OMP_NUM_THREADS'] = '1'
+    os.environ['MKL_DYNAMIC'] = 'FALSE'
+
     df = []
     for csv in train:
         df.append(pd.read_csv(csv))
