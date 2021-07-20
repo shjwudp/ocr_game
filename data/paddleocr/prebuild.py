@@ -47,6 +47,8 @@ def down_image(url, dst_dir):
     dst_path = os.path.join(dst_dir, filename)
     if os.path.exists(dst_path):
         return
+    if not os.path.exists(dst_dir):
+        os.mkdir(dst_dir)
     urllib.request.urlretrieve(url, dst_path)
 
 
