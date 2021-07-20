@@ -6,6 +6,7 @@ import urllib.request
 from urllib.parse import unquote
 from joblib import Parallel, delayed
 from tqdm import tqdm
+import time
 
 
 train = [
@@ -49,7 +50,13 @@ def down_image(url, dst_dir):
         return
     if not os.path.exists(dst_dir):
         os.mkdir(dst_dir)
-    urllib.request.urlretrieve(url, dst_path)
+    for i in range(3):
+        try:
+            urllib.request.urlretrieve(url, dst_path)
+            break
+        except TimeoutError as err:
+            print("url={}, err={}".format(url, err))
+            time.sleep(3)
 
 
 def download():
