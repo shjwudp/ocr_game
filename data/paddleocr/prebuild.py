@@ -10,18 +10,6 @@ import time
 import typing
 
 
-train = [
-    "Xeon1OCR_round1_train1_20210526.csv",
-    "Xeon1OCR_round1_train_20210524.csv",
-    "Xeon1OCR_round1_train2_20210526.csv"
-]
-test = [
-    "Xeon1OCR_round1_test1_20210528.csv",
-    "Xeon1OCR_round1_test2_20210528.csv",
-    "Xeon1OCR_round1_test3_20210528.csv"
-]
-
-
 def toPaddleStyle(jso):
     out = []
     if "option" in jso[1]:
@@ -60,10 +48,21 @@ def down_image(url, dst_dir):
             time.sleep(6 ** i)
 
 
-def download() -> pd.Series:
+def download() -> typing.Tuple[pd.Series, pd.Series]:
     os.environ['MKL_NUM_THREADS'] = '1'
     os.environ['OMP_NUM_THREADS'] = '1'
     os.environ['MKL_DYNAMIC'] = 'FALSE'
+
+    train = [
+        "Xeon1OCR_round1_train1_20210526.csv",
+        "Xeon1OCR_round1_train_20210524.csv",
+        "Xeon1OCR_round1_train2_20210526.csv"
+    ]
+    test = [
+        "Xeon1OCR_round1_test1_20210528.csv",
+        "Xeon1OCR_round1_test2_20210528.csv",
+        "Xeon1OCR_round1_test3_20210528.csv"
+    ]
 
     df = []
     for csv in train:
@@ -71,6 +70,7 @@ def download() -> pd.Series:
     df = pd.concat(df)
     df["链接"] = df["原始数据"].apply(lambda x: json.loads(x)["tfspath"])
     df["链接"].to_csv("train.txt", header=False, index=False)
+    df.to_csv("all_train.txt")
 
     urls = [row["链接"] for (_, row) in df.iterrows()]
     Parallel(n_jobs=-1)(delayed(down_image)(url, "train") for url in tqdm(urls))
@@ -86,7 +86,7 @@ def download() -> pd.Series:
         Parallel(n_jobs=-1)(
             delayed(down_image)(url, f"test{i + 1}") for url in tqdm(urls))
 
-    return df
+    return df, test_df
 
 
 def prebuild(train):
@@ -107,7 +107,7 @@ def prebuild(train):
 
 
 def main():
-    train = download()
+    train, test = download()
     print(train)
     prebuild(train)
 
