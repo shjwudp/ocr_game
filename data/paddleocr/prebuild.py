@@ -107,6 +107,7 @@ def prebuild():
 
 def main():
     download()
+    prebuild()
 
 
 if __name__ == "__main__":
