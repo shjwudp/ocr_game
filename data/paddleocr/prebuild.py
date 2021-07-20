@@ -58,7 +58,7 @@ def download():
     df["链接"] = df["原始数据"].apply(lambda x: json.loads(x)["tfspath"])
     df["链接"].to_csv("train.txt", header=False, index=False)
 
-    urls = [row["链接"] for row in df]
+    urls = [row["链接"] for row in df.iterrows()]
     Parallel(n_jobs=-1)(delayed(down_image)(url, "train") for url in tqdm(urls))
 
     test_df = []
@@ -68,7 +68,7 @@ def download():
         df["链接"] = df["原始数据"].apply(lambda x: json.loads(x)["tfspath"])
         df["链接"].to_csv(f"test{i+1}.txt", header=False, index=False)
 
-        urls = [row["链接"] for row in df]
+        urls = [row["链接"] for row in df.iterrows()]
         Parallel(n_jobs=-1)(
             delayed(down_image)(url, f"test{i + 1}") for url in tqdm(urls))
 
