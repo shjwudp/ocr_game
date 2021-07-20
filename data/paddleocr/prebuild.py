@@ -63,6 +63,8 @@ def download():
     urls = [row["链接"] for (_, row) in df.iterrows()]
     Parallel(n_jobs=-1)(delayed(down_image)(url, "train") for url in tqdm(urls))
 
+    print("???")
+
     test_df = []
     for i, csv in enumerate(test):
         df = pd.read_csv(csv)
