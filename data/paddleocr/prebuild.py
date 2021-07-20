@@ -43,7 +43,7 @@ def toPaddleStyle(jso):
 
 
 def down_image(url, dst_dir):
-    filename = unquote(url.split('/')[-1])
+    filename = url.split('/')[-1]
     dst_path = os.path.join(dst_dir, filename)
     if os.path.exists(dst_path):
         return
@@ -84,7 +84,7 @@ def download():
 def prebuild():
     valid_ratio = 0.1
 
-    train["图片"] = train["原始数据"].apply(lambda x: unquote(unquote(json.loads(x)["tfspath"].split("/")[-1])))
+    train["图片"] = train["原始数据"].apply(lambda x: json.loads(x)["tfspath"].split("/")[-1])
     train["答案"] = train["融合答案"].apply(lambda x: toPaddleStyle(json.loads(x)))
     valid = np.zeros((len(train),), dtype=bool)
     valid[: int(len(train) * valid_ratio)] = True
