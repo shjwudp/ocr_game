@@ -7,6 +7,7 @@ from urllib.parse import unquote
 from joblib import Parallel, delayed
 from tqdm import tqdm
 import time
+import typing
 
 
 train = [
@@ -59,7 +60,7 @@ def down_image(url, dst_dir):
             time.sleep(6 ** i)
 
 
-def download():
+def download() -> pd.Series:
     os.environ['MKL_NUM_THREADS'] = '1'
     os.environ['OMP_NUM_THREADS'] = '1'
     os.environ['MKL_DYNAMIC'] = 'FALSE'
@@ -74,8 +75,6 @@ def download():
     urls = [row["链接"] for (_, row) in df.iterrows()]
     Parallel(n_jobs=-1)(delayed(down_image)(url, "train") for url in tqdm(urls))
 
-    print("???")
-
     test_df = []
     for i, csv in enumerate(test):
         df = pd.read_csv(csv)
@@ -87,8 +86,10 @@ def download():
         Parallel(n_jobs=-1)(
             delayed(down_image)(url, f"test{i + 1}") for url in tqdm(urls))
 
+    return df
 
-def prebuild():
+
+def prebuild(train):
     valid_ratio = 0.1
 
     train["图片"] = train["原始数据"].apply(lambda x: json.loads(x)["tfspath"].split("/")[-1])
@@ -106,8 +107,9 @@ def prebuild():
 
 
 def main():
-    download()
-    prebuild()
+    train = download()
+    print(train)
+    prebuild(train)
 
 
 if __name__ == "__main__":
