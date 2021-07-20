@@ -2,7 +2,7 @@ import json
 import os
 import numpy as np
 import pandas as pd
-import urllib
+import urllib.request
 from urllib.parse import unquote
 from joblib import Parallel, delayed
 from tqdm import tqdm
