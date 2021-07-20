@@ -1,7 +1,11 @@
 import json
+import os
 import numpy as np
 import pandas as pd
+import urllib
 from urllib.parse import unquote
+from joblib import Parallel, delayed
+from tqdm import tqdm
 
 
 train = [
@@ -14,6 +18,8 @@ test = [
     "Xeon1OCR_round1_test2_20210528.csv",
     "Xeon1OCR_round1_test3_20210528.csv"
 ]
+
+img_dir 
 
 
 def toPaddleStyle(jso):
@@ -38,6 +44,14 @@ def toPaddleStyle(jso):
     return json.dumps(out, ensure_ascii=False)
 
 
+def down_image(url, dst_dir):
+    filename = unquote(url.split('/')[-1])
+    dst_path = os.path.join(dst_dir, filename)
+    if os.path.exists(dst_path):
+        return
+    urllib.request.urlretrieve(url, dst_path)
+
+
 def download():
     df = []
     for csv in train:
@@ -46,12 +60,19 @@ def download():
     df["链接"] = df["原始数据"].apply(lambda x: json.loads(x)["tfspath"])
     df["链接"].to_csv("train.txt", header=False, index=False)
 
+    urls = [row["链接"] for row in df]
+    Parallel(n_jobs=-1)(delayed(down_image)(url, "train") for url in tqdm(urls))
+
     test_df = []
     for i, csv in enumerate(test):
         df = pd.read_csv(csv)
         test_df.append(df)
         df["链接"] = df["原始数据"].apply(lambda x: json.loads(x)["tfspath"])
         df["链接"].to_csv(f"test{i+1}.txt", header=False, index=False)
+
+        urls = [row["链接"] for row in df]
+        Parallel(n_jobs=-1)(
+            delayed(down_image)(url, f"test{i + 1}") for url in tqdm(urls))
 
 
 def prebuild():
