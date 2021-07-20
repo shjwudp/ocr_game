@@ -56,7 +56,7 @@ def down_image(url, dst_dir):
             break
         except TimeoutError as err:
             print("url={}, err={}".format(url, err))
-            time.sleep(3)
+            time.sleep(6 ** i)
 
 
 def download():
