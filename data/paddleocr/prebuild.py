@@ -110,7 +110,7 @@ def infer(test, test_df):
         resdict = {}
         for img in test_df[i]['链接']:
             # name = img.split('/')[-1][:-4]
-            name = img.split('/')[-1]
+            name = img.split('/')[-1][:-4]
             # unquote_name = unquote(unquote(name))[:-4]
             points = []
             transcriptions = []
