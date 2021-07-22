@@ -81,6 +81,7 @@ def prebuild(train):
     valid_ratio = 0.1
 
     print(train)
+    # train["图片"] = train["原始数据"].apply(lambda x: unquote(unquote(json.loads(x)["tfspath"].split("/")[-1])))
     train["图片"] = train["原始数据"].apply(lambda x: json.loads(x)["tfspath"].split("/")[-1])
     train["答案"] = train["融合答案"].apply(lambda x: toPaddleStyle(json.loads(x)))
     valid = np.zeros((len(train),), dtype=bool)
@@ -109,8 +110,8 @@ def infer(test, test_df):
     for i in range(3):
         resdict = {}
         for img in test_df[i]['链接']:
-            # name = unquote(unquote(img.split('/')[-1]))[:-4]
-            name = img.split('/')[-1][:-4]
+            name = unquote(unquote(img.split('/')[-1]))[:-4]
+            # name = img.split('/')[-1][:-4]
             points = []
             transcriptions = []
             result = ocr.ocr(f"test{i + 1}/{name}.jpg")
