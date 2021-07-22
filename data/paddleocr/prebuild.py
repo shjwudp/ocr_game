@@ -118,11 +118,12 @@ def infer(test, test_df):
             for line in result:
                 points.append(sum(line[0], []))
                 transcriptions.append(line[1][0])
+
             resdict[name] = {
                 "pointsList": points,
                 "transcriptionsList": transcriptions,
                 "ignoreList": [False] * len(points),
-                "classesList": [1] * len(points)
+                "classesList": [1] * len(points),
             }
         with open(f"{test[i][:-4]}.json", "w") as f:
             json.dump(resdict, f, ensure_ascii=False)
