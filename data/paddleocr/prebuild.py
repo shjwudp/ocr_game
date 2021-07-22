@@ -124,8 +124,8 @@ def infer(test, test_df):
                 "ignoreList": [False] * len(points),
                 "classesList": [1] * len(points)
             }
-    with open(f"{test[i][:-4]}.json", "w") as f:
-        json.dump(resdict, f, ensure_ascii=False)
+        with open(f"{test[i][:-4]}.json", "w") as f:
+            json.dump(resdict, f, ensure_ascii=False)
 
 
 def main():
